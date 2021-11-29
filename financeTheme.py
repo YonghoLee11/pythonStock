@@ -121,7 +121,7 @@ def get_same_theme_items():
     events = []
     item_themes =  getItemIncludeThemeInfo()
     for theme in item_themes:
-        events = getEventsObj(theme)
+        events += getEventsObj(theme)
     return events
 
 ##테마 관련 종목 정보 불러오기
