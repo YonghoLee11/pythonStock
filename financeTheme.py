@@ -1,9 +1,6 @@
 from bs4 import BeautifulSoup
 import requests
 
-input_event = "058110"
-##input_event = "멕아이씨에스"
-
 def getMaxNavi():
     url = "https://finance.naver.com/sise/theme.naver?&page=1"
     res = requests.get(url , verify = False)
@@ -40,6 +37,20 @@ def getThemesObj():##테마주 정보 가져오기
             
             themes.append(theme)
     return themes 
+
+def find_thems():##테마 명으로 테마 정보 검색
+    input_name = input("테마명을 입력하세요 : ")
+    themes = getThemesObj()
+    find_themes = []
+    for theme in themes:
+        if input_name in theme["theme_name"]:
+            find_themes.append(theme)
+    return find_themes  
+     
+##find_thems 사용
+# find_themes = find_thems()
+# for find_theme in find_themes:
+#     print(find_theme)
 
 def getEventsObj(param):##테마주 관련 종목 가져오기
     turl = param["href"]
@@ -81,8 +92,9 @@ def getEventsObj(param):##테마주 관련 종목 가져오기
     return events   
 
 #종목의 현재 테마주 정보 가져오기
-def getItemIncludeThemeInfo():
+def get_themes_include_item():
     item_in_thems = []
+    input_event = input("종목명 또는 종목 코드를 입력하세요.")
     
     try:
         input_event_no = int(input_event)                   ##정수 확인용 , 문자일 경우 exception으로..
@@ -105,21 +117,11 @@ def getItemIncludeThemeInfo():
         print(type(ex).__name__)
     finally:
         return item_in_thems    
-    
-    # themes = getThemesObj()   
-    # item_in_thems = []
-    # for theme in  themes :
-    #     events = getEventsObj(theme)
-    #     for event in events:
-    #         ##if event["event_name"] == event_name:
-    #         if event["evnet_no"] == input_event:
-    #             item_in_thems.append(theme)    
-    # return  item_in_thems
 
 ##종목의 다른 테마주 정보 가져오기
 def get_same_theme_items():
     events = []
-    item_themes =  getItemIncludeThemeInfo()
+    item_themes =  get_themes_include_item()
     for theme in item_themes:
         events += getEventsObj(theme)
     return events
@@ -140,12 +142,10 @@ def getThemsEventsObj():
 #     print(idx + 1, theme) 
 
 ##종목의 관련 테마 주 종목 정보 
-events = get_same_theme_items()
-for event in events:
-    print(event)              
+# events = get_same_theme_items()
+# for event in events:
+#     print(event)              
 
-##종목의 테마 정보 
-#print(getItemIncludeThemeInfo()) 
 
 ##전체 테마주 전체 종목 가져오기
 # eventsObj = getThemsEventsObj()
