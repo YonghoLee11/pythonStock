@@ -7,7 +7,7 @@ def get_rise_items():
     for item in items:
         print(item)
 
-#get_rise_items()
+get_rise_items()
 
     
 ##테마 관련 정보 가져오기
