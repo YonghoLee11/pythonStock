@@ -1,0 +1,11 @@
+from apscheduler.schedulers.blocking import BlockingScheduler
+import news.news as news
+
+scheduler = BlockingScheduler()
+
+def myfunc():
+    news.reqNewsApi()
+
+scheduler.add_job(myfunc, 'interval', seconds=10)
+
+scheduler.start()
