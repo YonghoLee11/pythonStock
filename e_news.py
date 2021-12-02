@@ -4,6 +4,9 @@ import time
 from bs4 import BeautifulSoup
 import requests
 from time import sleep
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
 # import Config
 
 # options = webdriver.ChromeOptions()
@@ -25,12 +28,16 @@ driver.maximize_window()
 
 print(1)
 
-##sleep(3)
+
 
 print(2)
 # 페이지 가져오기(이동)
-driver.get('https://news.naver.com/')
+driver.get('https://news.naver.com/main/main.naver?mode=LSD&mid=shm&sid1=101')
+element = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "section_body")))
+print(element)
 print(3)
+
+sleep(10)
 
 # login_form = driver.find_element_by_id('section_body')
 
