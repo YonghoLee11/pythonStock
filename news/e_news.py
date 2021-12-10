@@ -61,3 +61,13 @@ get_news_dict(s_soup, kind = "social")
 for data in news_col.find():
     print(data)
 print(" !!!!!!!!!!!!!!!!!!!! ")
+
+
+def get_main_category_info():
+    pass
+
+def get_sub_main_category_info():
+    pass
+
+def get_submain_category_info():
+    pass
