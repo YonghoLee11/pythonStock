@@ -1,9 +1,12 @@
 import item.financeRise as rise
 import theme.financeTheme as f_theme
 from flask import Flask, jsonify, request
+from flask_cors import CORS
 
 app = Flask (__name__)
 app.config['JSON_AS_ASCII'] = False #한글깨짐 방지
+CORS(app)
+
 
 ##코스피 / 코스닼 상위 20개 종목 조회
 @app.route('/get_rise_items')  
@@ -36,12 +39,16 @@ def find_themes():
         
 ##find_themes()  
 
+
 ##테마명으로 테마 종목 정보 조회하기(like 검색)  
-@app.route('/find_themes_items')  
-def find_themes_items():
-    events = f_theme.find_themes_items()
+@app.route('/find_themes_items/<string:search_text>/')  
+def find_themes_items(search_text):
+    print(search_text)
+    f_theme.search_name =  search_text
+    items = f_theme.find_themes_items()
+    print(items)
     return {
-        "events" : events
+        "items" : items
     }
         
 ##find_themes_items()     
@@ -68,7 +75,7 @@ def get_same_theme_items():
 ##print(get_same_theme_items())       
 
 
-@app.route('/')
+@app.route('/stock')
 def hello_world():
     return 'Hello, World!'
 

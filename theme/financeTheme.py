@@ -136,6 +136,19 @@ def getThemsEventsObj():
         #     break
     return events 
 
+search_name = ""
+
+def find_themes_items():
+    themes = getThemesObj()
+    find_themes = []
+    events = []
+    for theme in themes:
+        if search_name in theme["theme_name"]:
+            find_themes.append(theme)
+    for theme in find_themes: 
+        events = getEventsObj(theme)    
+    return events        
+
 ##테마별 시세 가져오기
 # themes = getThemesObj()
 # for idx , theme in enumerate(themes):
