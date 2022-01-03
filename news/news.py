@@ -2,90 +2,105 @@ import urllib.request
 import json
 from bs4 import BeautifulSoup
 import requests
-   
-# link = 'https://news.naver.com/main/read.naver?mode=LSD&mid=sec&sid1=102&oid=023&aid=0003654319'     
-# headers = {'User-Agent' : 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.55 Safari/537.36'}
+from pymongo import MongoClient
 
-# res = requests.get(link , headers = headers)
-# soup = BeautifulSoup(res.text, "html.parser")       
-# print(soup.find("h3",{"id":"articleTitle"}))   
-       
-def reqNewsApi():
+news_querys = []
+
+def req_news_api(news_query):
+    ##mongo connect
+    client = MongoClient('localhost', 27017)
+
+    db_news = client.news
+
+    news_col = db_news.news_col
+    
     client_id = "mcqw21WtLaCOxmTkQ3vj"
-    client_secret = "Xgt_F342K1"
+    client_secret = "Xgt_F342K1"      
+    # keyword = "형지" 
     url = "https://openapi.naver.com/v1/search/news.json"
-    option = "&display=20&sort=date&start=4"
-
-    query = "?query="+urllib.parse.quote('주가')
-    url_query = url + query + option
-    request = urllib.request.Request(url_query)
-    request.add_header("X-Naver-Client-Id",client_id)
-    request.add_header("X-Naver-Client-Secret",client_secret)
-    response = urllib.request.urlopen(request)
+    params = {"query" : news_query , "display" : 10 , "sort" : "date" , "start" : 1}
+    ##params = {"display" : 100 , "sort" : "date" , "start" : 1}
+    headers = {"X-Naver-Client-Id" : client_id,"X-Naver-Client-Secret" : client_secret}
+    res = requests.get(url , params = params , headers=headers , verify = False)
     
-    if response.getcode() == 200:
-        response_body = response.read().decode('utf-8')
-        resJson = json.loads(response_body)
-        response.close() 
-        return resJson 
-    else:
-        print(" err req api !!! ")
-        response.close() 
-        return ""
+    print(res.text , "@@@@@@@@@@@@@@" , type(res.text))
     
-def getItem(data) :
-    return data['items']
+    res_objs = list(eval(res.text))
+    
+    for res_obj in res_objs:
+        print(res_obj.title , "!!!!!!!!!!!!!!!!!"  )
+        news_data = {}
 
-def getLink(data):
-    print(data)
-    links = []
-    for item in data:
-        links.append(item["link"])
-    return links    
+        news_data["title"] = res_obj.title
+        news_data["originallink"] = res_obj.originallink
+        news_data["link"] = res_obj.link  
+        news_data["description"] = res_obj.description  
+        news_data["pubDate"] = res_obj.pubDate 
+        
+        find_news = news_col.find({"link" : news_data["link"]})
+        
+        if len(list(find_news)) == 0:
+            news_col.insert_one(news_data)
+    client.close()    
+    
+def get_news():   
+ 
+    for query in news_querys:
+        req_news_api(query)     
+  
 
-def getHtmlText(data):
-    ##print(data)
-    newsDataList = []
-    for link in data:
-        newsDataDic = {}
-        try:
-            print("@@@@@@@@@@@@@@@@@@@" , link)
-            headers = {'User-Agent' : 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.55 Safari/537.36'}
-            if "https://news.naver.com/main/read.naver" not in link :
-                newsDataDic["link"] = link
-                newsDataDic["title"] = ""
-                newsDataDic["content"] = ""
-                newsDataDic["err"] = ""
-                newsDataDic["date"] = ""
-                newsDataList.append(newsDataDic)
-                continue
-            res = requests.get(link , headers=headers)   
-            soup = BeautifulSoup(res.text, "html.parser")
-            title = soup.find("h3",{"id":"articleTitle"}).text  
-            content = soup.find("div",{"id":"articleBodyContents"}).text, "content"
-            newsDataDic["link"] = link
-            newsDataDic["title"] = title
-            newsDataDic["content"] = content
-            newsDataDic["err"] = ""
-            newsDataDic["date"] = ""
-            newsDataList.append(newsDataDic)
-            # for tag in soup.find_all('div'):
-            #     print(tag.get_text())
-        except Exception as e:
-            print(e)
-            newsDataDic["link"] = link
-            newsDataDic["title"] = ""
-            newsDataDic["content"] = ""
-            newsDataDic["err"] = e
-            newsDataDic["date"] = ""
-        finally:
-            print("==")        
-    return newsDataList
-#### getHtmlText end ###
+       
+# def reqNewsApi():
+#     client_id = "mcqw21WtLaCOxmTkQ3vj"
+#     client_secret = "Xgt_F342K1"
+#     url = "https://openapi.naver.com/v1/search/news.json"
+#     option = "&display=50&sort=date&start=4"
+#     query = "?query="+urllib.parse.quote('주가')
+#     url_query = url + query + option
+#     request = urllib.request.Request(url_query)
+#     request.add_header("X-Naver-Client-Id",client_id)
+#     request.add_header("X-Naver-Client-Secret",client_secret)
+#     response = urllib.request.urlopen(request)
+    
+#     if response.getcode() == 200:
+#         response_body = response.read().decode('utf-8')
+#         resJson = json.loads(response_body)
+#         response.close() 
+#         return resJson 
+#     else:
+#         print(" err req api !!! ")
+#         response.close() 
+#         return ""
+    
+# print(reqNewsApi())    
+    
+# def getItem(data) :
+#     return data['items']
 
-apiRes = reqNewsApi()
-if apiRes!="":
-    items = getItem(apiRes)
-    links = getLink(items)
-    newsData = getHtmlText(links)    
-    print(newsData)
+# def getLink(data):
+#     links = []
+#     for item in data:
+#         links.append(item["link"])
+#     return links    
+
+# def getHtmlText(data):
+#     ##print(data)
+#     for link in data:
+#         try:
+#             print("@@@@@@@@@@@@@@@@@@@" , link)
+#             if "https://news.naver.com/main/read.naver" not in link :
+#                 continue
+#             res = requests.get(link , verify=False)   
+#             soup = BeautifulSoup(res.text, "html.parser")
+#             ##print(soup.find("h3",{"id":"articleTitle"}))   
+#             for tag in soup.find_all('div'):
+#                 print(tag.get_text())
+
+#         except Exception as e:
+#             print(e)
+
+# apiRes = reqNewsApi()
+# if apiRes!="":
+#     items = getItem(apiRes)
+#     links = getLink(items)
+#     getHtmlText(links)    
