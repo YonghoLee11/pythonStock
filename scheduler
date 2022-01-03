@@ -3,8 +3,10 @@ import news.news as news
 
 scheduler = BlockingScheduler()
 
+news.news_querys = ["인수","코로나"]
+
 def myfunc():
-    news.reqNewsApi()
+    news.get_news()
 
 scheduler.add_job(myfunc, 'interval', seconds=10)
 
