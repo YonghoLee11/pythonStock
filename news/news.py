@@ -4,7 +4,9 @@ from bs4 import BeautifulSoup
 import requests
 from pymongo import MongoClient
 
-news_querys = []
+# news_querys = []
+
+news_querys = ["인수","코로나"]
 
 def req_news_api(news_query):
     ##mongo connect
@@ -23,19 +25,22 @@ def req_news_api(news_query):
     headers = {"X-Naver-Client-Id" : client_id,"X-Naver-Client-Secret" : client_secret}
     res = requests.get(url , params = params , headers=headers , verify = False)
     
-    print(res.text , "@@@@@@@@@@@@@@" , type(res.text))
+    # print(res.text , "@@@@@@@@@@@@@@" , type(res.text))
     
-    res_objs = list(eval(res.text))
+    res_objs = eval(res.text)
     
-    for res_obj in res_objs:
-        print(res_obj.title , "!!!!!!!!!!!!!!!!!"  )
+    # print("^^^", type(res_objs) , res_objs , "******************8")
+    # print(type(res_objs["items"]) , "$$$$$$$$$$$$$$$$$$$$4")
+    
+    for res_obj in res_objs["items"]:
+        # print(res_obj["title"] , "!!!!!!!!!!!!!!!!!"  )
         news_data = {}
 
-        news_data["title"] = res_obj.title
-        news_data["originallink"] = res_obj.originallink
-        news_data["link"] = res_obj.link  
-        news_data["description"] = res_obj.description  
-        news_data["pubDate"] = res_obj.pubDate 
+        news_data["title"] = res_obj["title"]
+        news_data["originallink"] = res_obj["originallink"]
+        news_data["link"] = res_obj["link"]  
+        news_data["description"] = res_obj["description"]  
+        news_data["pubDate"] = res_obj["pubDate"] 
         
         find_news = news_col.find({"link" : news_data["link"]})
         
@@ -46,8 +51,37 @@ def req_news_api(news_query):
 def get_news():   
  
     for query in news_querys:
-        req_news_api(query)     
-  
+        req_news_api(query)   
+        
+def db_find_all():
+    ##mongo connect
+    client = MongoClient('localhost', 27017)
+
+    db_news = client.news
+
+    news_col = db_news.news_col
+    
+    _news = news_col.find()  
+    
+    for item in _news:
+        print(item)  
+        
+def db_search():
+    ##mongo connect
+    client = MongoClient('localhost', 27017)
+
+    db_news = client.news
+
+    news_col = db_news.news_col
+    
+    _news = news_col.find({"$or" : [{"title" : {"$regex" : '코로나'}} , {"description" : {"$regex" : '코로나'}}]})  
+    
+    for item in _news:
+        print(item)          
+        
+get_news()         
+
+db_search()  
 
        
 # def reqNewsApi():
