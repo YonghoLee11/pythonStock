@@ -4,9 +4,9 @@ from bs4 import BeautifulSoup
 import requests
 from pymongo import MongoClient
 
-# news_querys = []
+news_querys = []
 
-news_querys = ["인수","코로나"]
+# news_querys = ["인수","코로나"]
 
 def req_news_api(news_query):
     ##mongo connect
@@ -66,7 +66,7 @@ def db_find_all():
     for item in _news:
         print(item)  
         
-def db_search():
+def db_search(search_text):
     ##mongo connect
     client = MongoClient('localhost', 27017)
 
@@ -74,14 +74,15 @@ def db_search():
 
     news_col = db_news.news_col
     
-    _news = news_col.find({"$or" : [{"title" : {"$regex" : '코로나'}} , {"description" : {"$regex" : '코로나'}}]})  
+    _news = news_col.find({"$or" : [{"title" : {"$regex" : search_text}} , {"description" : {"$regex" : search_text}}]})  
     
-    for item in _news:
-        print(item)          
+    return _news
+    # for item in _news:
+    #     print(item)          
         
-get_news()         
+# get_news()         
 
-db_search()  
+# db_search()  
 
        
 # def reqNewsApi():
